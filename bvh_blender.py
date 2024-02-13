@@ -39,16 +39,6 @@ def modify_second_bvh(first_file_entries, second_file, k):
         file.writelines(modified_lines)
 
 
-# Example usage
-"""
-#first_bvh = '__Flying.bvh'
-#second_bvh = '__Run.bvh'
-#i, j, k = 36, 95, 23  # example indices
-
-#first_file_lines = read_bvh_frames(first_bvh)
-#extracted_entries = extract_entries(first_file_lines, i, j)
-#modify_second_bvh(extracted_entries, second_bvh, k)
-"""
 
 def count_total_channels(bvh_file):
     """ Count the total number of channels in the BVH file's hierarchy """
@@ -101,11 +91,69 @@ def modify_and_output_to_new_file(first_file_entries, second_file, output_file, 
     with open(output_file, 'w') as file:
         file.writelines(modified_lines)
 
+
+def get_joint_channel_index(bvh_file, joint_name):
+    """Get the index of the first channel associated with the specified joint."""
+    with open(bvh_file, 'r') as file:
+        lines = file.readlines()
+
+    # Find the index where joint information starts
+    joint_index = -1
+    for idx, line in enumerate(lines):
+        if line.strip().startswith('JOINT {}'.format(joint_name.upper())):
+            joint_index = idx
+            break
+
+    if joint_index == -1:
+        print("Joint '{}' not found in the BVH file.".format(joint_name))
+        return None
+
+    # Find the line where channels are defined for the joint
+    channels_line_index = lines.index('OFFSET 0.00 0.00 0.00\n', joint_index) + 1
+
+    # Extract the channels associated with the joint
+    channels = lines[channels_line_index].split()[1:]
+
+    # Determine the number of channels (each channel could have 3 or 6 values)
+    num_channels = len(channels)
+    if num_channels % 3 == 0:
+        num_channels = num_channels // 3
+    else:
+        num_channels = num_channels // 6
+
+    # Find the index of the first channel associated with the joint
+    first_channel_index = channels_line_index + 1
+
+    return first_channel_index
+
+# Example usage:
+bvh_file = 'Ostrich.bvh'  # Assuming motion1.bvh contains the BVH data
+joint_name = 'Bip01_Pelvis'  # Name of the joint you want to find the index of its first channel
+
+first_channel_index = get_joint_channel_index(bvh_file, joint_name)
+if first_channel_index is not None:
+    print("Index of the first channel associated with joint '{}': {}".format(joint_name, first_channel_index))
+
+
 # Example usage
-first_bvh = '__Flying.bvh'
-second_bvh = '__Run.bvh'
-output_bvh = '__Run2.bvh'  # Path for the new output file
-i, j, k = 36, 95, 23  # example indices
+# first_bvh = 'Flying.bvh'
+# second_bvh = 'GoatRun.bvh'
+# output_bvh = 'out3.bvh'  # Path for the new output file
+# i, j, k = 36, 95, 23  # example indices
+
+# first_file_lines = read_bvh_frames(first_bvh)
+# extracted_entries = extract_entries(first_file_lines, i, j)
+# modify_and_output_to_new_file(extracted_entries, second_bvh, output_bvh, i, j, k)
+
+print(count_total_channels('Crab.bvh'))
+print(count_total_channels('Ostrich.bvh'))
+print(count_total_channels('Flying.bvh'))
+print(count_total_channels('out.bvh'))
+
+first_bvh = 'Crab.bvh'
+second_bvh = 'OstrichAtt.bvh'
+output_bvh = 'out1.bvh'  # Path for the new output file
+i, j, k = 228, 323, 293  # example indices
 
 first_file_lines = read_bvh_frames(first_bvh)
 extracted_entries = extract_entries(first_file_lines, i, j)
