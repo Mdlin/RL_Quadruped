@@ -12,9 +12,18 @@ def parse_bvh_line(line):
         return "OFFSET", list(map(float, parts[1:]))
     return None, None
 
+# def parse_bvh_line(line):
+#    parts = line.strip().split()
+#    if not parts:
+#        return None, None
+#    label = parts
+#    if label in {'ROOT'}:
+#        return label
+
+
 def create_mujoco_body(joint_name, offset):
     body = ET.Element("body", name=joint_name, pos=" ".join(map(str, offset)))
-    # Add a sphere geom to represent the joint visually when the body is created
+    # Add a sp/home/miko/bojian/RL_Quadruped1/Cat/CAT_Walk.bvhhere geom to represent the joint visually when the body is created
     geom = ET.SubElement(body, "geom", name=f"{joint_name}_geom", type="sphere", size="0.5")  # Sphere size is arbitrary
     return body
 
